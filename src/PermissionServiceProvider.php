@@ -1,17 +1,17 @@
 <?php
 
-namespace Smk\Permission;
+namespace BuildWithSmk\TenantPermission;
 
+use BuildWithSmk\TenantPermission\Console\CacheResetCommand;
+use BuildWithSmk\TenantPermission\Console\InstallCommand;
+use BuildWithSmk\TenantPermission\Console\SuperAdminCommand;
+use BuildWithSmk\TenantPermission\Http\UiHelper;
+use BuildWithSmk\TenantPermission\Middleware\PermissionMiddleware;
+use BuildWithSmk\TenantPermission\Middleware\RoleMiddleware;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
-use Smk\Permission\Console\CacheResetCommand;
-use Smk\Permission\Console\InstallCommand;
-use Smk\Permission\Console\SuperAdminCommand;
-use Smk\Permission\Http\UiHelper;
-use Smk\Permission\Middleware\PermissionMiddleware;
-use Smk\Permission\Middleware\RoleMiddleware;
 
 class PermissionServiceProvider extends ServiceProvider
 {

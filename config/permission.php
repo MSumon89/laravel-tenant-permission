@@ -1,8 +1,8 @@
 <?php
 
-use Smk\Permission\Models\Permission;
-use Smk\Permission\Models\Role;
-use Smk\Permission\Tenancy\DefaultTenantResolver;
+use BuildWithSmk\TenantPermission\Models\Permission;
+use BuildWithSmk\TenantPermission\Models\Role;
+use BuildWithSmk\TenantPermission\Tenancy\DefaultTenantResolver;
 
 return [
 
@@ -34,7 +34,7 @@ return [
         // database-per-tenant setup) and the UI should list every user.
         'tenant_column' => 'tenant_id',
 
-        // Any class implementing Smk\Permission\Contracts\TenantResolver.
+        // Any class implementing BuildWithSmk\TenantPermission\Contracts\TenantResolver.
         'resolver' => DefaultTenantResolver::class,
     ],
 

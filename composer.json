@@ -27,13 +27,13 @@
     },
     "autoload": {
         "psr-4": {
-            "Smk\\Permission\\": "src/",
-            "Smk\\Permission\\Database\\Seeders\\": "database/seeders/"
+            "BuildWithSmk\\TenantPermission\\": "src/",
+            "BuildWithSmk\\TenantPermission\\Database\\Seeders\\": "database/seeders/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Smk\\Permission\\Tests\\": "tests/"
+            "BuildWithSmk\\TenantPermission\\Tests\\": "tests/"
         }
     },
     "scripts": {
@@ -43,10 +43,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Smk\\Permission\\PermissionServiceProvider"
+                "BuildWithSmk\\TenantPermission\\PermissionServiceProvider"
             ],
             "aliases": {
-                "PermissionManager": "Smk\\Permission\\Facades\\PermissionManager"
+                "PermissionManager": "BuildWithSmk\\TenantPermission\\Facades\\PermissionManager"
             }
         }
     },

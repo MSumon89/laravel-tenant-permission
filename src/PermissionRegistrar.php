@@ -1,14 +1,14 @@
 <?php
 
-namespace Smk\Permission;
+namespace BuildWithSmk\TenantPermission;
 
+use BuildWithSmk\TenantPermission\Contracts\TenantResolver;
+use BuildWithSmk\TenantPermission\Models\Permission;
+use BuildWithSmk\TenantPermission\Models\Role;
+use BuildWithSmk\TenantPermission\Tenancy\DefaultTenantResolver;
 use Closure;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Database\Eloquent\Model;
-use Smk\Permission\Contracts\TenantResolver;
-use Smk\Permission\Models\Permission;
-use Smk\Permission\Models\Role;
-use Smk\Permission\Tenancy\DefaultTenantResolver;
 
 /**
  * Central service of the package: tenant scope resolution, configured model

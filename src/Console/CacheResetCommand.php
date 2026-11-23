@@ -1,9 +1,9 @@
 <?php
 
-namespace Smk\Permission\Console;
+namespace BuildWithSmk\TenantPermission\Console;
 
+use BuildWithSmk\TenantPermission\PermissionRegistrar;
 use Illuminate\Console\Command;
-use Smk\Permission\PermissionRegistrar;
 
 class CacheResetCommand extends Command
 {

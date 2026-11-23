@@ -1,9 +1,9 @@
 <?php
 
+use BuildWithSmk\TenantPermission\Http\Controllers\PermissionController;
+use BuildWithSmk\TenantPermission\Http\Controllers\RoleController;
+use BuildWithSmk\TenantPermission\Http\Controllers\UserAccessController;
 use Illuminate\Support\Facades\Route;
-use Smk\Permission\Http\Controllers\PermissionController;
-use Smk\Permission\Http\Controllers\RoleController;
-use Smk\Permission\Http\Controllers\UserAccessController;
 
 /*
 | Loaded only when config('permission.ui.enabled') is true. Prefix, name

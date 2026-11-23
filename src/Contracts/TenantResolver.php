@@ -1,6 +1,6 @@
 <?php
 
-namespace Smk\Permission\Contracts;
+namespace BuildWithSmk\TenantPermission\Contracts;
 
 use Illuminate\Database\Eloquent\Model;
 

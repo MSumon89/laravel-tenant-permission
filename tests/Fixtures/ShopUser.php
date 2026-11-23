@@ -1,8 +1,8 @@
 <?php
 
-namespace Smk\Permission\Tests\Fixtures;
+namespace BuildWithSmk\TenantPermission\Tests\Fixtures;
 
-use Smk\Permission\Contracts\BelongsToTenant;
+use BuildWithSmk\TenantPermission\Contracts\BelongsToTenant;
 
 /**
  * A user whose tenant lives in a differently named column.

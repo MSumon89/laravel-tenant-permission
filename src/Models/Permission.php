@@ -1,12 +1,12 @@
 <?php
 
-namespace Smk\Permission\Models;
+namespace BuildWithSmk\TenantPermission\Models;
 
+use BuildWithSmk\TenantPermission\Exceptions\PermissionDoesNotExist;
+use BuildWithSmk\TenantPermission\PermissionRegistrar;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Str;
-use Smk\Permission\Exceptions\PermissionDoesNotExist;
-use Smk\Permission\PermissionRegistrar;
 
 /**
  * An entry in the global permission catalog, e.g. "posts.edit".

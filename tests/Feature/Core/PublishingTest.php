@@ -1,7 +1,7 @@
 <?php
 
+use BuildWithSmk\TenantPermission\PermissionServiceProvider;
 use Illuminate\Support\ServiceProvider;
-use Smk\Permission\PermissionServiceProvider;
 
 it('publishes the views for redesign', function () {
     $paths = ServiceProvider::pathsToPublish(PermissionServiceProvider::class, 'permission-views');

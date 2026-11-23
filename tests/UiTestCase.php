@@ -1,6 +1,6 @@
 <?php
 
-namespace Smk\Permission\Tests;
+namespace BuildWithSmk\TenantPermission\Tests;
 
 /**
  * The UI routes are registered at boot, so they must be enabled in the

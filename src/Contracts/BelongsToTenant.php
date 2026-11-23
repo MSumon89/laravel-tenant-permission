@@ -1,6 +1,6 @@
 <?php
 
-namespace Smk\Permission\Contracts;
+namespace BuildWithSmk\TenantPermission\Contracts;
 
 /**
  * Implement on your User model when its tenant is not a plain `tenant_id`

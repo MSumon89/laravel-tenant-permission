@@ -1,8 +1,10 @@
 # Changelog
 
-## 1.1.0 (unreleased)
+## 1.0.0 (2026-11-23)
 
-First standalone release, extracted from the in-repo copy (1.0.0).
+First public release. It is extracted from the private in-repo copy `smk/permission`;
+the lists below are the differences from that copy. The namespace changed from
+`Smk\Permission` to `BuildWithSmk\TenantPermission`.
 
 ### Added
 - `tenancy.enabled` switch (`PERMISSION_TENANCY`). Off = plain single-app RBAC.

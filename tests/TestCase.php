@@ -1,12 +1,12 @@
 <?php
 
-namespace Smk\Permission\Tests;
+namespace BuildWithSmk\TenantPermission\Tests;
 
+use BuildWithSmk\TenantPermission\Models\Role;
+use BuildWithSmk\TenantPermission\PermissionServiceProvider;
+use BuildWithSmk\TenantPermission\Tests\Fixtures\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Orchestra\Testbench\TestCase as Orchestra;
-use Smk\Permission\Models\Role;
-use Smk\Permission\PermissionServiceProvider;
-use Smk\Permission\Tests\Fixtures\User;
 
 abstract class TestCase extends Orchestra
 {

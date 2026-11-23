@@ -1,9 +1,9 @@
 <?php
 
-namespace Smk\Permission\Database\Seeders;
+namespace BuildWithSmk\TenantPermission\Database\Seeders;
 
+use BuildWithSmk\TenantPermission\PermissionRegistrar;
 use Illuminate\Database\Seeder;
-use Smk\Permission\PermissionRegistrar;
 
 /**
  * Seeds what every app needs, whatever its domain:

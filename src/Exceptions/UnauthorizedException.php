@@ -1,6 +1,6 @@
 <?php
 
-namespace Smk\Permission\Exceptions;
+namespace BuildWithSmk\TenantPermission\Exceptions;
 
 use Symfony\Component\HttpKernel\Exception\HttpException;
 

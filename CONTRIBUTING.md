@@ -95,20 +95,24 @@ Then run `composer update buildwithsmk/laravel-tenant-permission`. Edits in this
 1. Update `CHANGELOG.md`. Don't add a `version` field to composer.json;
    Packagist reads versions from git tags.
 2. `composer test && composer format`
-3. Commit, then tag: `git tag v1.1.0 && git push origin main --tags`
+3. Commit, push, then tag: `git tag v1.0.1 && git push origin v1.0.1`
+   (patch = fixes, minor = new features, major = breaking changes).
+4. Create a GitHub Release from the tag and paste the CHANGELOG section.
+5. Packagist picks the tag up via the GitHub hook. Without the hook, click
+   **Update** on the package page.
 
-**First-time publishing**
+Never move or re-push an existing tag. Users and Packagist's cache may
+already have that version. Release a new version instead.
 
-- Create a GitHub repo and push this folder.
-- **Public:** sign in at packagist.org → Submit → paste the repo URL, then
-  enable the GitHub hook so new tags appear automatically. Check first that
-  the package is published as `buildwithsmk/laravel-tenant-permission`. Repo:
-  `github.com/MSumon89/laravel-tenant-permission`. (The short vendor `smk` belongs
-  to someone else on Packagist, so don't use it.) The PHP namespace stays `Smk\Permission`.
-- **Private:** in each app, add
+**Where it lives**
+
+- Packagist: `buildwithsmk/laravel-tenant-permission`
+  (the short vendor `smk` belongs to someone else, so don't use it).
+- GitHub: `github.com/MSumon89/laravel-tenant-permission`
+- PHP namespace: `BuildWithSmk\TenantPermission`
+- Private use without Packagist: add
   `{ "type": "vcs", "url": "git@github.com:MSumon89/laravel-tenant-permission.git" }`
-  to `repositories` and `composer require buildwithsmk/laravel-tenant-permission:^1.1`
-  (or use Private Packagist / Satis).
+  to an app's `repositories`, then `composer require buildwithsmk/laravel-tenant-permission:^1.0`.
 
 Before the first public release, add a GitHub Actions workflow that runs
 `composer test` on PHP 8.2–8.4 × Laravel 11/12/13.

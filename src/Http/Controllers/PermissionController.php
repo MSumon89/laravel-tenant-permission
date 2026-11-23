@@ -1,12 +1,12 @@
 <?php
 
-namespace Smk\Permission\Http\Controllers;
+namespace BuildWithSmk\TenantPermission\Http\Controllers;
 
+use BuildWithSmk\TenantPermission\Models\Permission;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Smk\Permission\Models\Permission;
 
 /**
  * The permission catalog is global (shared by every tenant). In a

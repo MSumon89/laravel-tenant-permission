@@ -1,14 +1,14 @@
 <?php
 
-namespace Smk\Permission\Models;
+namespace BuildWithSmk\TenantPermission\Models;
 
+use BuildWithSmk\TenantPermission\Exceptions\RoleDoesNotExist;
+use BuildWithSmk\TenantPermission\PermissionRegistrar;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Arr;
-use Smk\Permission\Exceptions\RoleDoesNotExist;
-use Smk\Permission\PermissionRegistrar;
 
 /**
  * A named set of permissions inside one tenant scope.

@@ -1,8 +1,8 @@
 <?php
 
+use BuildWithSmk\TenantPermission\Models\Permission;
+use BuildWithSmk\TenantPermission\Models\Role;
 use Illuminate\Support\Facades\Route;
-use Smk\Permission\Models\Permission;
-use Smk\Permission\Models\Role;
 
 beforeEach(function () {
     Permission::findOrCreate('posts.edit');

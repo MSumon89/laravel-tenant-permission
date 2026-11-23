@@ -1,12 +1,12 @@
 <?php
 
-namespace Smk\Permission\Facades;
+namespace BuildWithSmk\TenantPermission\Facades;
 
+use BuildWithSmk\TenantPermission\PermissionRegistrar;
 use Illuminate\Support\Facades\Facade;
-use Smk\Permission\PermissionRegistrar;
 
 /**
- * @method static \Smk\Permission\PermissionRegistrar setCurrentTenantId(?int $tenantId)
+ * @method static \BuildWithSmk\TenantPermission\PermissionRegistrar setCurrentTenantId(?int $tenantId)
  * @method static int|null getCurrentTenantId()
  * @method static int currentScopeId()
  * @method static int tenantIdFor(?\Illuminate\Database\Eloquent\Model $model = null)

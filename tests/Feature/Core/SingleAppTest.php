@@ -1,11 +1,11 @@
 <?php
 
+use BuildWithSmk\TenantPermission\Models\Permission;
+use BuildWithSmk\TenantPermission\Models\Role;
+use BuildWithSmk\TenantPermission\PermissionRegistrar;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
-use Smk\Permission\Models\Permission;
-use Smk\Permission\Models\Role;
-use Smk\Permission\PermissionRegistrar;
 
 beforeEach(function () {
     foreach (['posts.view', 'posts.edit', 'posts.delete'] as $name) {

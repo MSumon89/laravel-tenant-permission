@@ -1,8 +1,8 @@
 <?php
 
-namespace Smk\Permission\Http;
+namespace BuildWithSmk\TenantPermission\Http;
 
-use Smk\Permission\PermissionRegistrar;
+use BuildWithSmk\TenantPermission\PermissionRegistrar;
 
 /**
  * Shared with every permission:: view as $pm.

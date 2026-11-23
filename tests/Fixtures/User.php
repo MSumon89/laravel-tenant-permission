@@ -1,9 +1,9 @@
 <?php
 
-namespace Smk\Permission\Tests\Fixtures;
+namespace BuildWithSmk\TenantPermission\Tests\Fixtures;
 
+use BuildWithSmk\TenantPermission\Traits\HasRolesAndPermissions;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Smk\Permission\Traits\HasRolesAndPermissions;
 
 class User extends Authenticatable
 {

@@ -42,7 +42,7 @@ The migrations load automatically from the package, so you don't need to publish
 Add the trait to your User model:
 
 ```php
-use Smk\Permission\Traits\HasRolesAndPermissions;
+use BuildWithSmk\TenantPermission\Traits\HasRolesAndPermissions;
 
 class User extends Authenticatable
 {
@@ -53,7 +53,7 @@ class User extends Authenticatable
 Seed the basics and make yourself Super Admin:
 
 ```bash
-php artisan db:seed --class="Smk\Permission\Database\Seeders\PermissionSeeder"
+php artisan db:seed --class="BuildWithSmk\TenantPermission\Database\Seeders\PermissionSeeder"
 php artisan permission:super-admin you@example.com
 ```
 
@@ -62,8 +62,8 @@ php artisan permission:super-admin you@example.com
 ## 2. Single-app usage (no tenancy)
 
 ```php
-use Smk\Permission\Models\Permission;
-use Smk\Permission\Models\Role;
+use BuildWithSmk\TenantPermission\Models\Permission;
+use BuildWithSmk\TenantPermission\Models\Role;
 
 // Seeder: your permission catalog ("<module>.<action>")
 foreach (['posts', 'users'] as $module) {
@@ -98,7 +98,7 @@ Pick the setup that matches your app:
 If the column is `tenant_id`, there's nothing to do. For another name, either set `tenancy.tenant_column`, or implement the contract:
 
 ```php
-use Smk\Permission\Contracts\BelongsToTenant;
+use BuildWithSmk\TenantPermission\Contracts\BelongsToTenant;
 
 class User extends Authenticatable implements BelongsToTenant
 {
@@ -115,7 +115,7 @@ class User extends Authenticatable implements BelongsToTenant
 Pin the current tenant in your own middleware, after you identify it:
 
 ```php
-use Smk\Permission\Facades\PermissionManager;
+use BuildWithSmk\TenantPermission\Facades\PermissionManager;
 
 public function handle(Request $request, Closure $next)
 {
@@ -132,7 +132,7 @@ Run this middleware **before** any `permission:` middleware or `@can` checks. Th
 Write a resolver and point `tenancy.resolver` at it:
 
 ```php
-use Smk\Permission\Contracts\TenantResolver;
+use BuildWithSmk\TenantPermission\Contracts\TenantResolver;
 
 class CurrentTenantResolver implements TenantResolver
 {
@@ -187,7 +187,7 @@ Route::get('/reports', ...)->middleware('permission:reports.view|reports.export'
 Route::get('/till', ...)->middleware('tenant_role:Manager|Cashier');
 ```
 
-Guests get a 401 (redirect to login). Users without access get a 403 (`Smk\Permission\Exceptions\UnauthorizedException`).
+Guests get a 401 (redirect to login). Users without access get a 403 (`BuildWithSmk\TenantPermission\Exceptions\UnauthorizedException`).
 
 **Blade:** `@can('posts.edit') … @endcan`. No custom directive is needed.
 
@@ -242,8 +242,9 @@ To scope the user list yourself (multi-tenant), add `scopeInPermissionTenant(Bui
 If your app used the earlier copy at `packages/smk/permission`:
 
 1. **Multi-tenant apps must set `PERMISSION_TENANCY=true`.** Tenancy is now opt-in. Without it, every check runs in the global scope.
-2. Remove the old `path` repository and `smk/permission` from your composer.json, run `composer require buildwithsmk/laravel-tenant-permission`, then `php artisan migrate`. The PHP namespace (`Smk\Permission`) is unchanged, so no code edits are needed. Missing columns (`roles.description`, `roles.is_admin`) are added, and existing tables are left alone.
-3. Behaviour changes to know about:
+2. Remove the old `path` repository and `smk/permission` from your composer.json, run `composer require buildwithsmk/laravel-tenant-permission`, then `php artisan migrate`. Missing columns (`roles.description`, `roles.is_admin`) are added, and existing tables are left alone.
+3. **The namespace changed** from `Smk\Permission` to `BuildWithSmk\TenantPermission`. Search and replace it across your app (`app/`, `config/`, `database/`, `routes/`, `tests/`), including any published `config/permission.php`.
+4. Behaviour changes to know about:
    - `getAllPermissions()` and `hasPermissionTo()` now return *all* permissions for tenant admins, matching what the Gate and middleware already did.
    - `hasRole()` now also counts global roles.
    - `PermissionRegistrar::forgetAll()` no longer flushes the whole app cache.

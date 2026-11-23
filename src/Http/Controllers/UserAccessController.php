@@ -1,14 +1,14 @@
 <?php
 
-namespace Smk\Permission\Http\Controllers;
+namespace BuildWithSmk\TenantPermission\Http\Controllers;
 
+use BuildWithSmk\TenantPermission\Models\Role;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
-use Smk\Permission\Models\Role;
 
 /**
  * Assign roles and set per-user grant/deny overrides, in the actor's scope.

@@ -1,6 +1,6 @@
 <?php
 
-namespace Smk\Permission\Console;
+namespace BuildWithSmk\TenantPermission\Console;
 
 use Illuminate\Console\Command;
 
@@ -30,8 +30,8 @@ class InstallCommand extends Command
             'Review config/permission.php (table names must be final before migrating).',
             'Multi-tenant app? Set PERMISSION_TENANCY=true in .env.',
             'Run: php artisan migrate',
-            'Add the Smk\Permission\Traits\HasRolesAndPermissions trait to your User model.',
-            'Seed the basics: php artisan db:seed --class="Smk\Permission\Database\Seeders\PermissionSeeder"',
+            'Add the BuildWithSmk\TenantPermission\Traits\HasRolesAndPermissions trait to your User model.',
+            'Seed the basics: php artisan db:seed --class="BuildWithSmk\TenantPermission\Database\Seeders\PermissionSeeder"',
             'Make yourself Super Admin: php artisan permission:super-admin you@example.com',
             'Optional UI: set PERMISSION_UI=true and open /'.config('permission.ui.prefix', 'access-control'),
         ]);

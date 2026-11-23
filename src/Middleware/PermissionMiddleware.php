@@ -1,11 +1,11 @@
 <?php
 
-namespace Smk\Permission\Middleware;
+namespace BuildWithSmk\TenantPermission\Middleware;
 
+use BuildWithSmk\TenantPermission\Exceptions\UnauthorizedException;
 use Closure;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
-use Smk\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\HttpFoundation\Response;
 
 class PermissionMiddleware

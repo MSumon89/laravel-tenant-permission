@@ -1,12 +1,12 @@
 <?php
 
-namespace Smk\Permission\Http\Controllers;
+namespace BuildWithSmk\TenantPermission\Http\Controllers;
 
+use BuildWithSmk\TenantPermission\Models\Role;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Smk\Permission\Models\Role;
 
 class RoleController extends Controller
 {

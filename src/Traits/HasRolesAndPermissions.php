@@ -1,16 +1,16 @@
 <?php
 
-namespace Smk\Permission\Traits;
+namespace BuildWithSmk\TenantPermission\Traits;
 
+use BuildWithSmk\TenantPermission\Models\Permission;
+use BuildWithSmk\TenantPermission\Models\Role;
+use BuildWithSmk\TenantPermission\PermissionRegistrar;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Smk\Permission\Models\Permission;
-use Smk\Permission\Models\Role;
-use Smk\Permission\PermissionRegistrar;
 
 /**
  * Add to your User model (or any Eloquent model that should hold roles).

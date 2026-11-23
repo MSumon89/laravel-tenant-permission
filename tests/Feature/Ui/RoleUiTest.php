@@ -1,7 +1,7 @@
 <?php
 
-use Smk\Permission\Models\Permission;
-use Smk\Permission\Models\Role;
+use BuildWithSmk\TenantPermission\Models\Permission;
+use BuildWithSmk\TenantPermission\Models\Role;
 
 beforeEach(function () {
     foreach (['access-control.manage', 'posts.view', 'posts.edit', 'posts.delete'] as $name) {

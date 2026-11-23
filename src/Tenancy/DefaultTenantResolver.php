@@ -1,10 +1,10 @@
 <?php
 
-namespace Smk\Permission\Tenancy;
+namespace BuildWithSmk\TenantPermission\Tenancy;
 
+use BuildWithSmk\TenantPermission\Contracts\BelongsToTenant;
+use BuildWithSmk\TenantPermission\Contracts\TenantResolver;
 use Illuminate\Database\Eloquent\Model;
-use Smk\Permission\Contracts\BelongsToTenant;
-use Smk\Permission\Contracts\TenantResolver;
 
 /**
  * Uses $model->getTenantId() when available (BelongsToTenant contract),

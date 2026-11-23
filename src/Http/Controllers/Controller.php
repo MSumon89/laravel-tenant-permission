@@ -1,7 +1,11 @@
 <?php
 
-namespace Smk\Permission\Http\Controllers;
+namespace BuildWithSmk\TenantPermission\Http\Controllers;
 
+use BuildWithSmk\TenantPermission\Http\UiHelper;
+use BuildWithSmk\TenantPermission\Models\Permission;
+use BuildWithSmk\TenantPermission\Models\Role;
+use BuildWithSmk\TenantPermission\PermissionRegistrar;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
@@ -9,10 +13,6 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use Smk\Permission\Http\UiHelper;
-use Smk\Permission\Models\Permission;
-use Smk\Permission\Models\Role;
-use Smk\Permission\PermissionRegistrar;
 
 /**
  * Shared rules for the built-in UI.
