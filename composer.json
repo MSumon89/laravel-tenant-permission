@@ -1,0 +1,61 @@
+{
+    "name": "buildwithsmk/laravel-tenant-permission",
+    "description": "Roles and permissions for Laravel. Works as plain RBAC in a single app, or tenant-scoped RBAC in a multi-tenant app. Per-user grant/deny overrides, Super Admin and tenant-admin bypass, and an optional built-in management UI.",
+    "keywords": ["laravel", "permission", "role", "rbac", "acl", "multi-tenant", "multi-vendor", "saas"],
+    "license": "MIT",
+    "type": "library",
+    "homepage": "https://github.com/MSumon89/laravel-tenant-permission",
+    "support": {
+        "issues": "https://github.com/MSumon89/laravel-tenant-permission/issues",
+        "source": "https://github.com/MSumon89/laravel-tenant-permission"
+    },
+    "require": {
+        "php": "^8.2",
+        "illuminate/auth": "^11.0|^12.0|^13.0",
+        "illuminate/cache": "^11.0|^12.0|^13.0",
+        "illuminate/console": "^11.0|^12.0|^13.0",
+        "illuminate/database": "^11.0|^12.0|^13.0",
+        "illuminate/http": "^11.0|^12.0|^13.0",
+        "illuminate/routing": "^11.0|^12.0|^13.0",
+        "illuminate/support": "^11.0|^12.0|^13.0",
+        "illuminate/view": "^11.0|^12.0|^13.0"
+    },
+    "require-dev": {
+        "laravel/pint": "^1.13",
+        "orchestra/testbench": "^9.0|^10.0|^11.0",
+        "pestphp/pest": "^3.0|^4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Smk\\Permission\\": "src/",
+            "Smk\\Permission\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Smk\\Permission\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/pest",
+        "format": "vendor/bin/pint"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Smk\\Permission\\PermissionServiceProvider"
+            ],
+            "aliases": {
+                "PermissionManager": "Smk\\Permission\\Facades\\PermissionManager"
+            }
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
