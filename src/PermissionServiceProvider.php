@@ -8,6 +8,8 @@ use BuildWithSmk\TenantPermission\Console\SuperAdminCommand;
 use BuildWithSmk\TenantPermission\Http\UiHelper;
 use BuildWithSmk\TenantPermission\Middleware\PermissionMiddleware;
 use BuildWithSmk\TenantPermission\Middleware\RoleMiddleware;
+use Illuminate\Console\Events\CommandFinished;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
@@ -54,7 +56,31 @@ class PermissionServiceProvider extends ServiceProvider
                 CacheResetCommand::class,
                 SuperAdminCommand::class,
             ]);
+
+            $this->registerInstallHint();
         }
+    }
+
+    /**
+     * Composer runs `package:discover` after every require/update. Until the
+     * config is published, append a one-line pointer to the install command
+     * so the next step is visible right in the composer output.
+     */
+    protected function registerInstallHint(): void
+    {
+        if (file_exists(config_path('permission.php'))) {
+            return;
+        }
+
+        Event::listen(CommandFinished::class, function (CommandFinished $event): void {
+            if ($event->command !== 'package:discover' || $event->exitCode !== 0) {
+                return;
+            }
+
+            $event->output->writeln('');
+            $event->output->writeln('  <fg=yellow;options=bold>buildwithsmk/laravel-tenant-permission:</> run <fg=green>php artisan permission:install</> to finish setup.');
+            $event->output->writeln('');
+        });
     }
 
     protected function registerPublishing(): void

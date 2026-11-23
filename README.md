@@ -28,6 +28,8 @@ composer require buildwithsmk/laravel-tenant-permission
 php artisan permission:install          # publishes config/permission.php
 ```
 
+`composer require` ends with a reminder to run `permission:install`. The reminder stops once `config/permission.php` exists.
+
 Before migrating, open `config/permission.php`:
 
 - **Multi-tenant app?** Set `PERMISSION_TENANCY=true` in `.env`.
