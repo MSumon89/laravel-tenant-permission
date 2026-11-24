@@ -1,6 +1,9 @@
 # Changelog
 
-## 1.1.0 (2026-11-24)
+## 1.1.1 (2026-11-24)
+
+First release of the branch features. The version number 1.1.0 was used by a
+pre-1.0 build and can't be reused on Packagist, so don't install 1.1.0.
 
 ### Added
 - **Branches** (`PERMISSION_BRANCHES`, off by default), with or without tenancy,
