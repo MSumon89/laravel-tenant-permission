@@ -24,6 +24,8 @@ use Illuminate\Support\Str;
  * - Other managers can only grant permissions they hold themselves, and
  *   only assign roles made of such permissions.
  * - Only a Super Admin can see or assign the Super Admin role.
+ * - With branches enabled, the screens manage every-branch (branch 0)
+ *   roles and overrides. Branch-only assignments are left untouched.
  */
 abstract class Controller extends BaseController
 {
@@ -43,8 +45,10 @@ abstract class Controller extends BaseController
 
     protected function actorIsAdmin(Request $request): bool
     {
+        // Branch 0: the UI edits every-branch access, so an is_admin role
+        // held in one branch only must not unlock it.
         return $this->actorIsSuperAdmin($request)
-            || $request->user()->isTenantAdmin($this->scopeTenantId($request));
+            || $request->user()->isTenantAdmin($this->scopeTenantId($request), PermissionRegistrar::ALL_BRANCHES);
     }
 
     /**
@@ -58,7 +62,7 @@ abstract class Controller extends BaseController
             return null;
         }
 
-        return $request->user()->getAllPermissions($this->scopeTenantId($request));
+        return $request->user()->getAllPermissions($this->scopeTenantId($request), PermissionRegistrar::ALL_BRANCHES);
     }
 
     /**

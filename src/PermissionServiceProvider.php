@@ -5,8 +5,10 @@ namespace BuildWithSmk\TenantPermission;
 use BuildWithSmk\TenantPermission\Console\CacheResetCommand;
 use BuildWithSmk\TenantPermission\Console\InstallCommand;
 use BuildWithSmk\TenantPermission\Console\SuperAdminCommand;
+use BuildWithSmk\TenantPermission\Http\Controllers\BranchSwitchController;
 use BuildWithSmk\TenantPermission\Http\UiHelper;
 use BuildWithSmk\TenantPermission\Middleware\PermissionMiddleware;
+use BuildWithSmk\TenantPermission\Middleware\ResolveBranch;
 use BuildWithSmk\TenantPermission\Middleware\RoleMiddleware;
 use Illuminate\Console\Events\CommandFinished;
 use Illuminate\Support\Facades\Event;
@@ -27,6 +29,7 @@ class PermissionServiceProvider extends ServiceProvider
         'create_permission_tables',
         'add_is_admin_to_roles_table',
         'add_description_to_roles_table',
+        'add_branch_id_to_permission_pivots',
     ];
 
     public function register(): void
@@ -49,6 +52,7 @@ class PermissionServiceProvider extends ServiceProvider
         $this->registerMiddleware();
         $this->registerGate();
         $this->registerUi();
+        $this->registerBranchRoutes();
 
         if ($this->app->runningInConsole()) {
             $this->commands([
@@ -155,6 +159,18 @@ class PermissionServiceProvider extends ServiceProvider
 
         $router->aliasMiddleware($aliases['permission'] ?? 'permission', PermissionMiddleware::class);
         $router->aliasMiddleware($aliases['role'] ?? 'tenant_role', RoleMiddleware::class);
+        $router->aliasMiddleware($aliases['branch'] ?? 'resolve_branch', ResolveBranch::class);
+    }
+
+    protected function registerBranchRoutes(): void
+    {
+        if (! config('permission.branches.enabled', false) || ! config('permission.branches.switch_route.enabled', true)) {
+            return;
+        }
+
+        Route::middleware(config('permission.branches.switch_route.middleware', ['web', 'auth']))
+            ->post(config('permission.branches.switch_route.uri', 'branch/switch'), BranchSwitchController::class)
+            ->name(config('permission.branches.switch_route.name', 'permission.branch.switch'));
     }
 
     /**

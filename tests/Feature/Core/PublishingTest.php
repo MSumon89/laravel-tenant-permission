@@ -28,7 +28,8 @@ it('publishes every migration in run order', function () {
     $sorted = $names;
     sort($sorted);
 
-    expect($names)->toHaveCount(3)
+    expect($names)->toHaveCount(4)
         ->and($sorted)->toBe($names)
-        ->and($names[0])->toEndWith('_create_permission_tables.php');
+        ->and($names[0])->toEndWith('_create_permission_tables.php')
+        ->and($names[3])->toEndWith('_add_branch_id_to_permission_pivots.php');
 });

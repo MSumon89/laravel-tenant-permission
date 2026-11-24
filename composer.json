@@ -1,7 +1,7 @@
 {
     "name": "buildwithsmk/laravel-tenant-permission",
     "description": "Roles and permissions for Laravel. Works as plain RBAC in a single app, or tenant-scoped RBAC in a multi-tenant app. Per-user grant/deny overrides, Super Admin and tenant-admin bypass, and an optional built-in management UI.",
-    "keywords": ["laravel", "permission", "role", "rbac", "acl", "multi-tenant", "multi-vendor", "saas"],
+    "keywords": ["laravel", "permission", "role", "rbac", "acl", "multi-tenant", "multi-vendor", "multi-branch", "branch", "saas"],
     "license": "MIT",
     "type": "library",
     "homepage": "https://github.com/MSumon89/laravel-tenant-permission",

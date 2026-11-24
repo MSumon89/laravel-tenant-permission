@@ -14,6 +14,7 @@ Roles and permissions for Laravel 11, 12 and 13 that work the same way in two ki
 
 Also included:
 
+- **Optional branches** (`PERMISSION_BRANCHES=true`), in either mode: HQ users switch between branches or see all of them, branch users are automatically limited to their own, and roles can be given per branch. It uses your own branch table. See [section 4](#4-branches-hq-and-branch-offices).
 - `@can`, `$user->can()`, `$this->authorize()` work with permission names out of the box.
 - Route middleware: `permission:` and `tenant_role:`.
 - Per-user caching that invalidates itself. Your app cache is never flushed.
@@ -163,14 +164,106 @@ Global roles (`tenant_id = 0`) apply in every tenant. The permission catalog is 
 
 ---
 
-## 4. API reference
+## 4. Branches (HQ and branch offices)
 
-**On the user** (every `$tenantId` is optional and defaults to the resolved scope):
+For data that belongs to branches, such as a clinic group with an HQ and several branch clinics:
+
+- **Branch users** only ever see their own branch. Filtering is automatic.
+- **HQ users** pick a branch from a dropdown, or choose **All branches** for combined data.
+- A person has **one login**. Their roles can apply in every branch, or in one branch only.
+
+This works **with or without tenancy**, and it uses **your own** branch table (`offices`, `branches`, `outlets`, …). The package stores branch ids only. With tenancy on, a check uses both the tenant and the branch.
+
+```dotenv
+PERMISSION_BRANCHES=true
+php artisan migrate   # adds branch_id to the role/override pivots
+```
+
+**1. Tell the package about your branches.** If every user has a `branch_id` column and can only access that branch, there's nothing to do. Otherwise write a resolver and set `branches.resolver`:
+
+```php
+use BuildWithSmk\TenantPermission\Contracts\BranchResolver;
+
+class OfficeBranchResolver implements BranchResolver
+{
+    public function defaultBranchId(Model $user): ?int
+    {
+        return $user->office_id;
+    }
+
+    public function accessibleBranchIds(Model $user): array
+    {
+        return $user->office?->is_hq
+            ? Office::where('parent_id', $user->office_id)->pluck('id')->push($user->office_id)->all()
+            : [$user->office_id];
+    }
+}
+```
+
+For something smaller, implement `HasBranches` (`getBranchId()`, `getAccessibleBranchIds()`) on the User model instead.
+
+**2. Pick the branch per request.** Append the middleware to the `web` group, so it runs before any `permission:` check:
+
+```php
+// bootstrap/app.php
+->withMiddleware(fn (Middleware $middleware) => $middleware->web(append: \BuildWithSmk\TenantPermission\Middleware\ResolveBranch::class))
+```
+
+It reads the choice from the session and checks it against the resolver. If the choice is missing or not allowed, it falls back to the home branch. **All branches** (`0`) is only allowed for users with more than one branch. Set `branches.default_all` to start HQ users there.
+
+**3. Filter your data.** Add the trait to branch-owned models:
+
+```php
+use BuildWithSmk\TenantPermission\Traits\BelongsToBranch;
+
+class Patient extends Model
+{
+    use BelongsToBranch;
+
+    protected string $branchColumn = 'office_id'; // default: branches.column
+}
+
+Patient::all();                          // selected branch, or every accessible branch in "All branches"
+Patient::forBranch($id)->get();          // narrow further (per-branch report columns)
+Patient::withoutBranchScope()->get();    // no filter (platform reports, console)
+```
+
+The branch column is filled in on create when one branch is selected. In "All branches" mode your form must send it. Validate it with `in_array($id, PermissionManager::getAccessibleBranchIds())`.
+
+Requests with no branch context return **no rows** (`branches.strict`), so a route that forgot the middleware fails safe. Console commands and queue jobs aren't filtered unless you call `PermissionManager::setCurrentBranchId($id)`.
+
+**4. The switch dropdown.** POST `branch_id` (`0` = All branches) to `route('permission.branch.switch')`. Branches the user can't access get a 403. The current values are available through `PermissionManager::getCurrentBranchId()` and `getAccessibleBranchIds()`. You render the branch names from your own table.
+
+**Branch-wise roles.** Assignments made without a branch apply in every branch, like before. Give a branch to make one branch-only:
+
+```php
+$user->assignRole('Doctor');                                    // every branch
+$user->assignRole('Manager', branchId: $gulshan->id);           // Gulshan only
+$user->denyPermissionTo('invoices.refund', branchId: $banani->id);
+
+$user->hasPermissionTo('patients.edit');                        // current branch
+$user->hasPermissionTo('patients.edit', branchId: $patient->office_id); // a row's branch, e.g. in a policy
+```
+
+| Check in | Counts |
+|---|---|
+| Branch X | every-branch roles/overrides + branch-X ones |
+| All branches | every-branch roles/overrides only, so a Gulshan-only Manager gets no Manager rights in the combined list |
+
+A deny in either scope wins. An `is_admin` role assigned to one branch gives every permission **in that branch only**. The built-in UI manages every-branch assignments and leaves branch-only ones alone.
+
+> Branch id `0` means "every branch". Never use `0` as a real branch id.
+
+---
+
+## 5. API reference
+
+**On the user** (every `$tenantId` is optional and defaults to the resolved scope). With branches, write methods take `branchId:` (default `0` = every branch), and check methods take `branchId:` (default = current branch):
 
 | Method | |
 |---|---|
 | `assignRole($role, $tenantId)` / `removeRole(...)` | `$role` = name or `Role` |
-| `syncRoles([...], $tenantId)` | names, ids or models. Only that tenant's roles are replaced |
+| `syncRoles([...], $tenantId)` | names, ids or models. Only that tenant's (and branch's) roles are replaced |
 | `hasRole('Manager')`, `hasRole(['A', 'B'])`, `hasAnyRole([...])` | global roles count everywhere |
 | `getRoleNames()`, `rolesForTenant()` | |
 | `givePermissionTo('x')` / `denyPermissionTo('x')` / `clearPermissionOverride('x')` | direct overrides |
@@ -178,6 +271,7 @@ Global roles (`tenant_id = 0`) apply in every tenant. The permission catalog is 
 | `hasPermissionTo('x')`, `hasAnyPermission([...])`, `hasAllPermissions([...])` | |
 | `getAllPermissions()`, `getPermissionsViaRoles()`, `getPermissionOverrides()` | |
 | `isSuperAdmin()`, `isTenantAdmin()` | |
+| `resolveTenantId()`, `resolveBranchId()` | the scope a check would use |
 
 **On a role:** `givePermissionTo('a', 'b')`, `revokePermissionTo(...)`, `syncPermissions([...])`, `hasPermissionTo('a')`, `Role::findByName($name, $tenantId)`, `Role::findOrCreate($name, $tenantId)`.
 
@@ -197,7 +291,7 @@ Guests get a 401 (redirect to login). Users without access get a 403 (`BuildWith
 
 ---
 
-## 5. The built-in UI (optional)
+## 6. The built-in UI (optional)
 
 ```dotenv
 PERMISSION_UI=true
@@ -232,14 +326,18 @@ With tenancy on, each person only sees their own tenant's roles and users (other
    php artisan vendor:publish --tag=permission-views
    ```
    They land in `resources/views/vendor/permission/` and override the package's copies. Routes, controllers, validation and the security rules above stay in the package, so your redesigned forms keep working. Keep the input names (`permissions[]`, `roles[]`, `overrides[<name>]`).
-3. **Build your own screens.** Leave the UI off and call the API in section 4 from your own controllers.
+3. **Build your own screens.** Leave the UI off and call the API in section 5 from your own controllers.
 
 Other UI options: `prefix`, `route_name_prefix`, `middleware`, `per_page`, `user_display_column`, `user_search_columns`.
 To scope the user list yourself (multi-tenant), add `scopeInPermissionTenant(Builder $query, int $tenantId)` to your User model. Otherwise `tenancy.tenant_column` is used.
 
 ---
 
-## 6. Upgrading from the old in-repo copy
+## 7. Upgrading
+
+**From 1.0 to 1.1:** run `php artisan migrate`. It adds `branch_id` (default `0`) to `model_has_roles` and `model_has_permissions`. Nothing else changes until you set `PERMISSION_BRANCHES=true`. A published `config/permission.php` keeps working without changes, because the package's `branches` defaults are merged in. Copy the `branches` block over only if you want to edit it.
+
+### From the old in-repo copy
 
 If your app used the earlier copy at `packages/smk/permission`:
 

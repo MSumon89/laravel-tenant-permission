@@ -71,7 +71,7 @@ class Role extends Model
             config('permission.table_names.model_has_roles', 'model_has_roles'),
             'role_id',
             config('permission.column_names.model_morph_key', 'model_id')
-        )->withPivot('tenant_id');
+        )->withPivot(['tenant_id', 'branch_id']);
     }
 
     /**

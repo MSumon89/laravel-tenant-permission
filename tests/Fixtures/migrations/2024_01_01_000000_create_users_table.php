@@ -15,7 +15,15 @@ return new class extends Migration
             $table->string('password')->nullable();
             $table->unsignedBigInteger('tenant_id')->nullable();
             $table->unsignedBigInteger('shop_id')->nullable();
+            $table->unsignedBigInteger('branch_id')->nullable();
             $table->rememberToken();
+            $table->timestamps();
+        });
+
+        Schema::create('patients', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('office_id');
+            $table->string('name');
             $table->timestamps();
         });
     }

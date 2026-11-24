@@ -1,5 +1,37 @@
 # Changelog
 
+## 1.1.0 (2026-11-24)
+
+### Added
+- **Branches** (`PERMISSION_BRANCHES`, off by default), with or without tenancy,
+  using the app's own branch table:
+  - `BranchResolver` contract, `DefaultBranchResolver` (reads `users.branch_id`),
+    and an optional `HasBranches` contract for the User model.
+  - `branch_id` on role assignments and per-user overrides. `0` = every branch,
+    which is the default for every write. `assignRole()`, `removeRole()`,
+    `syncRoles()`, `givePermissionTo()`, `denyPermissionTo()`,
+    `clearPermissionOverride()`, `syncPermissionOverrides()` and
+    `getPermissionOverrides()` take `branchId:`.
+  - Checks (`hasPermissionTo()`, `hasRole()`, `isTenantAdmin()`,
+    `getAllPermissions()`, …) take `branchId:`, defaulting to the current branch.
+    "All branches" (`0`) counts only every-branch assignments.
+  - `resolve_branch` middleware (session-based, validated against the resolver),
+    and a `POST branch/switch` route.
+  - `BelongsToBranch` trait and `BranchScope` for branch-owned models, with
+    `forBranch()` and `withoutBranchScope()`. Strict by default: an HTTP request
+    with no branch context returns no rows.
+  - `PermissionManager::setCurrentBranchId()`, `getCurrentBranchId()`,
+    `getAccessibleBranchIds()`, `isAllBranches()`, `visibleBranchIds()`.
+- Migration `add_branch_id_to_permission_pivots` (run `php artisan migrate`).
+
+### Changed
+- The same role can now be held more than once by a user, once per branch.
+  Assignments are written with an insert instead of `syncWithoutDetaching()`.
+- The built-in UI manages every-branch assignments. An `is_admin` role held
+  in a single branch does not make someone a UI admin.
+- `PermissionRegistrar::rememberEffectivePermissions()` takes an optional
+  fourth `$branchId` argument, and cache keys include the branch.
+
 ## 1.0.0 (2026-11-23)
 
 First public release. It is extracted from the private in-repo copy `smk/permission`;

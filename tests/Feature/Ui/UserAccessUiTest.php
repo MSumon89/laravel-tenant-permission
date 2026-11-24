@@ -70,3 +70,40 @@ it('lets a super admin manage the catalog', function () {
         ->post('/access-control/permissions', ['name' => 'bad name!'])
         ->assertSessionHasErrors('name');
 });
+
+it('does not treat an is_admin role held in one branch as a UI admin', function () {
+    config()->set('permission.branches.enabled', true);
+
+    Role::findOrCreate('Branch Admin')->update(['is_admin' => true]);
+    $editor = Role::findOrCreate('Editor')->givePermissionTo('posts.edit');
+    $branchAdmin = $this->makeUser(['branch_id' => 3])->assignRole('Branch Admin', branchId: 3);
+    $target = $this->makeUser();
+
+    // Inside branch 3 they hold every permission, so they may open the UI...
+    expect($branchAdmin->hasPermissionTo('access-control.manage'))->toBeTrue();
+
+    // ...but the UI edits every-branch access, which they do not administer.
+    $this->actingAs($branchAdmin)->put("/access-control/users/{$target->id}", ['roles' => [$editor->id]])
+        ->assertForbidden();
+});
+
+it('keeps branch-only roles when the UI saves every-branch roles', function () {
+    config()->set('permission.branches.enabled', true);
+
+    $editor = Role::findOrCreate('Editor');
+    $manager = Role::findOrCreate('Manager');
+    $user = $this->makeUser()->assignRole($manager, branchId: 3);
+
+    $this->actingAs($this->makeSuperAdmin())->get("/access-control/users/{$user->id}")
+        ->assertOk()
+        ->assertViewHas('heldIds', []);
+
+    $this->actingAs($this->makeSuperAdmin())->put("/access-control/users/{$user->id}", ['roles' => [$editor->id]])
+        ->assertRedirect();
+
+    $user->refresh();
+
+    expect($user->hasRole('Manager', branchId: 3))->toBeTrue()
+        ->and($user->hasRole('Editor', branchId: 0))->toBeTrue()
+        ->and($user->hasRole('Manager', branchId: 0))->toBeFalse();
+});

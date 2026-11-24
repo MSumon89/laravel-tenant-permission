@@ -2,6 +2,8 @@
 
 namespace BuildWithSmk\TenantPermission;
 
+use BuildWithSmk\TenantPermission\Branches\DefaultBranchResolver;
+use BuildWithSmk\TenantPermission\Contracts\BranchResolver;
 use BuildWithSmk\TenantPermission\Contracts\TenantResolver;
 use BuildWithSmk\TenantPermission\Models\Permission;
 use BuildWithSmk\TenantPermission\Models\Role;
@@ -20,6 +22,11 @@ use Illuminate\Database\Eloquent\Model;
 class PermissionRegistrar
 {
     protected ?int $currentTenantId = null;
+
+    protected ?int $currentBranchId = null;
+
+    /** @var array<int, int>|null */
+    protected ?array $accessibleBranchIds = null;
 
     /** @var array<string, array<int, string>> */
     protected array $memo = [];
@@ -98,6 +105,122 @@ class PermissionRegistrar
         return app(config('permission.tenancy.resolver') ?? DefaultTenantResolver::class);
     }
 
+    // -----------------------------------------------------------------
+    // Branches
+    // -----------------------------------------------------------------
+
+    /**
+     * Branch id meaning "every branch": the scope of assignments made
+     * without a branch, and the scope of checks in "All branches" mode.
+     */
+    public const ALL_BRANCHES = 0;
+
+    public function branchesEnabled(): bool
+    {
+        return (bool) config('permission.branches.enabled', false);
+    }
+
+    /**
+     * Pin the branch for the rest of the request. Pass ALL_BRANCHES (0) for
+     * the "All branches" view, or null to unpin. The resolve_branch
+     * middleware calls this for you.
+     */
+    public function setCurrentBranchId(?int $branchId): static
+    {
+        $this->currentBranchId = $branchId;
+        $this->memo = [];
+
+        return $this;
+    }
+
+    public function getCurrentBranchId(): ?int
+    {
+        return $this->currentBranchId;
+    }
+
+    /**
+     * The branches the current user may see, used by BelongsToBranch in
+     * "All branches" mode. Set by the resolve_branch middleware.
+     *
+     * @param  array<int, int>|null  $branchIds
+     */
+    public function setAccessibleBranchIds(?array $branchIds): static
+    {
+        $this->accessibleBranchIds = $branchIds === null
+            ? null
+            : array_values(array_unique(array_map('intval', $branchIds)));
+
+        return $this;
+    }
+
+    /**
+     * @return array<int, int>|null null = no branch context yet
+     */
+    public function getAccessibleBranchIds(): ?array
+    {
+        return $this->accessibleBranchIds;
+    }
+
+    public function isAllBranches(): bool
+    {
+        return $this->currentBranchId === self::ALL_BRANCHES;
+    }
+
+    /**
+     * The branch a model's checks run in: the pinned branch, otherwise the
+     * user's home branch from the resolver, otherwise ALL_BRANCHES. Always
+     * ALL_BRANCHES when branches are disabled.
+     */
+    public function branchIdFor(?Model $model = null): int
+    {
+        if (! $this->branchesEnabled()) {
+            return self::ALL_BRANCHES;
+        }
+
+        if ($this->currentBranchId !== null) {
+            return $this->currentBranchId;
+        }
+
+        if ($model === null) {
+            return self::ALL_BRANCHES;
+        }
+
+        return $this->branchResolver()->defaultBranchId($model) ?? self::ALL_BRANCHES;
+    }
+
+    /**
+     * Branch ids BelongsToBranch models are filtered to, or null when there
+     * is no branch context (nothing pinned).
+     *
+     * @return array<int, int>|null
+     */
+    public function visibleBranchIds(): ?array
+    {
+        if ($this->currentBranchId === null) {
+            return null;
+        }
+
+        if ($this->currentBranchId === self::ALL_BRANCHES) {
+            return $this->accessibleBranchIds ?? [];
+        }
+
+        return [$this->currentBranchId];
+    }
+
+    /**
+     * Whether a BelongsToBranch query with no branch context returns no
+     * rows (true) or is left unfiltered (false).
+     */
+    public function branchScopeFailsClosed(): bool
+    {
+        return (bool) config('permission.branches.strict', true) && ! app()->runningInConsole();
+    }
+
+    public function branchResolver(): BranchResolver
+    {
+        return app(config('permission.branches.resolver') ?? DefaultBranchResolver::class);
+    }
+
     public function superAdminRoleName(): string
     {
         return (string) config('permission.super_admin_role', 'Super Admin');
@@ -157,20 +280,21 @@ class PermissionRegistrar
 
     /**
      * Get (and cache) the effective permission names of a model in a tenant
-     * scope. $resolver computes the list on a miss.
+     * and branch scope. $resolver computes the list on a miss.
      *
      * @param  Closure(): array<int, string>  $resolver
      * @return array<int, string>
      */
-    public function rememberEffectivePermissions(Model $model, int $tenantId, Closure $resolver): array
+    public function rememberEffectivePermissions(Model $model, int $tenantId, Closure $resolver, int $branchId = self::ALL_BRANCHES): array
     {
         $key = sprintf(
-            '%s:v%d:%s:v%d:t%d',
+            '%s:v%d:%s:v%d:t%d:b%d',
             $this->prefix(),
             $this->version('global'),
             $this->modelToken($model),
             $this->version('model:'.$this->modelToken($model)),
-            $tenantId
+            $tenantId,
+            $branchId
         );
 
         if (array_key_exists($key, $this->memo)) {

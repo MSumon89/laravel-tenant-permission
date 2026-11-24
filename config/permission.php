@@ -1,5 +1,6 @@
 <?php
 
+use BuildWithSmk\TenantPermission\Branches\DefaultBranchResolver;
 use BuildWithSmk\TenantPermission\Models\Permission;
 use BuildWithSmk\TenantPermission\Models\Role;
 use BuildWithSmk\TenantPermission\Tenancy\DefaultTenantResolver;
@@ -36,6 +37,63 @@ return [
 
         // Any class implementing BuildWithSmk\TenantPermission\Contracts\TenantResolver.
         'resolver' => DefaultTenantResolver::class,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Branches (optional, works with or without tenancy)
+    |--------------------------------------------------------------------------
+    |
+    | For apps whose data belongs to branches (offices, clinics, outlets):
+    | HQ users can switch between branches or see all of them at once, and
+    | branch users only ever see their own branch. Uses YOUR branch table;
+    | the package only stores branch ids.
+    |
+    | - Role assignments and overrides get a branch_id. 0 = every branch,
+    |   which is also what every assignment made without a branch gets.
+    | - A check in branch X counts the user's branch-0 roles + branch-X roles.
+    |   In "All branches" mode only branch-0 roles count.
+    | - The `resolve_branch` middleware picks the current branch per request
+    |   (session, validated against the resolver), and the BelongsToBranch
+    |   trait filters your models by it.
+    |
+    | Disabled (default): branch_id is never read. Nothing changes.
+    |
+    */
+    'branches' => [
+        'enabled' => (bool) env('PERMISSION_BRANCHES', false),
+
+        // Any class implementing BuildWithSmk\TenantPermission\Contracts\BranchResolver.
+        'resolver' => DefaultBranchResolver::class,
+
+        // Home-branch column on the user model, read by the default resolver
+        // (unless the user implements HasBranches).
+        'user_column' => 'branch_id',
+
+        // Branch column on your data tables, used by the BelongsToBranch
+        // trait. A model can override it with a $branchColumn property.
+        'column' => 'branch_id',
+
+        // Session key holding the selected branch (0 = "All branches").
+        'session_key' => 'permission_branch_id',
+
+        // What a multi-branch (HQ) user sees before choosing a branch:
+        // false = their home branch, true = "All branches".
+        'default_all' => false,
+
+        // In an HTTP request with no branch context (the resolve_branch
+        // middleware did not run), BelongsToBranch models return no rows.
+        // Console commands and queue jobs are never filtered without a
+        // context: set one there with PermissionManager::setCurrentBranchId().
+        'strict' => true,
+
+        // POST <uri> with `branch_id` (0 = all) switches the branch.
+        'switch_route' => [
+            'enabled' => true,
+            'uri' => 'branch/switch',
+            'name' => 'permission.branch.switch',
+            'middleware' => ['web', 'auth'],
+        ],
     ],
 
     /*
@@ -120,6 +178,7 @@ return [
     'middleware_aliases' => [
         'permission' => 'permission',   // ->middleware('permission:posts.edit|posts.delete')
         'role' => 'tenant_role',        // ->middleware('tenant_role:Manager|Cashier')
+        'branch' => 'resolve_branch',   // picks the current branch; run it before the two above
     ],
 
     /*

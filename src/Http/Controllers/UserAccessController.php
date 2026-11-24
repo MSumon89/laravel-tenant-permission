@@ -3,6 +3,7 @@
 namespace BuildWithSmk\TenantPermission\Http\Controllers;
 
 use BuildWithSmk\TenantPermission\Models\Role;
+use BuildWithSmk\TenantPermission\PermissionRegistrar;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
@@ -50,14 +51,14 @@ class UserAccessController extends Controller
             'displayColumn' => config('permission.ui.user_display_column', 'name'),
             'roles' => $this->rolesInScope($request)->orderBy('name')->get(),
             'assignableIds' => $assignable->modelKeys(),
-            'heldIds' => $user->roles->where('tenant_id', $tenantId)->modelKeys(),
+            'heldIds' => $this->heldRoles($user, $tenantId)->modelKeys(),
             'permissionsByModule' => $this->permissionsByModule(),
-            'overrides' => $user->getPermissionOverrides($tenantId),
-            'viaRoles' => $user->getPermissionsViaRoles($tenantId),
-            'effective' => $user->getAllPermissions($tenantId),
+            'overrides' => $user->getPermissionOverrides($tenantId, PermissionRegistrar::ALL_BRANCHES),
+            'viaRoles' => $user->getPermissionsViaRoles($tenantId, PermissionRegistrar::ALL_BRANCHES),
+            'effective' => $user->getAllPermissions($tenantId, PermissionRegistrar::ALL_BRANCHES),
             'grantable' => $this->grantablePermissions($request),
             'isSuperAdmin' => $user->isSuperAdmin(),
-            'isTenantAdmin' => $user->isTenantAdmin($tenantId),
+            'isTenantAdmin' => $user->isTenantAdmin($tenantId, PermissionRegistrar::ALL_BRANCHES),
         ]);
     }
 
@@ -93,7 +94,7 @@ class UserAccessController extends Controller
     {
         $requested = array_map('intval', $request->input('roles', []));
         $assignable = $this->assignableRoles($request)->modelKeys();
-        $held = $user->roles->where('tenant_id', $tenantId);
+        $held = $this->heldRoles($user, $tenantId);
         $heldIds = $held->modelKeys();
 
         abort_if(array_diff($requested, $assignable, $heldIds) !== [], 403, 'You cannot assign one of those roles.');
@@ -144,6 +145,20 @@ class UserAccessController extends Controller
         $this->ensureCanGrant($request, $changed);
 
         return $requested;
+    }
+
+    /**
+     * Roles the user holds in the tenant for every branch (branch 0), the
+     * ones this screen edits.
+     *
+     * @return Collection<int, Role>
+     */
+    protected function heldRoles(Model $user, int $tenantId): Collection
+    {
+        return $user->roles
+            ->filter(fn (Role $role): bool => (int) $role->tenant_id === $tenantId
+                && (int) ($role->pivot->branch_id ?? 0) === PermissionRegistrar::ALL_BRANCHES)
+            ->values();
     }
 
     /**

@@ -33,7 +33,7 @@
                             @endif
                         </td>
                         <td>
-                            @forelse ($user->rolesForTenant($tenantId) as $role)
+                            @forelse ($user->rolesForTenant($tenantId, 0) as $role)
                                 <span @class(['pm-badge', 'pm-badge-accent' => $role->is_admin || $role->isSuperAdminRole()])>{{ $role->name }}</span>
                             @empty
                                 <span class="pm-muted">No roles</span>
